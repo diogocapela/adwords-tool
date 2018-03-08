@@ -10,6 +10,12 @@
 <!-- Vendor -->
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.3/css/bootstrap.min.css" integrity="sha384-Zug+QiDoJOrZ5t4lssLdxGhVrurbmBWopoEl+M6BdEfwnCJZtKxi1KgxUyJq13dy" crossorigin="anonymous">
 
+<style>
+button {
+  margin-top: 10px;
+}
+</style>
+
 </head>
 <body>
 
@@ -20,17 +26,17 @@
       <br>
 
       <div class="form-group">
-        <label for="input">Input</label>
-        <textarea id="input" class="form-control" rows="5"></textarea>
+        <button id="btn-clear" class="btn btn-danger">Clear</button>
+        <button id="btn-remove-duplicates" class="btn btn-primary">Remove Duplicates</button>
+        <button id="btn-sort-alphabetically" class="btn btn-primary">Sort Alphabetically</button>
+        <button id="btn-remove-big-keywords" class="btn btn-primary">Remove Big Keywords</button>
       </div>
 
-      <button id="normalize-btn" class="btn btn-primary">Normalize</button>
-
-      <br><br><br>
+      <br>
 
       <div class="form-group">
-        <label for="output">Output</label>
-        <textarea id="output" class="form-control" rows="5"></textarea>
+        <label for="keywords">Keywords // <b>Lines: <span id="keywords-lines">0</span></b></label>
+        <textarea id="keywords" class="form-control" rows="15"></textarea>
       </div>
 
     </div>
@@ -44,38 +50,83 @@
 
 <script>
 
-$('#normalize-btn').on('click', function() {
-
-let inputString = $('#input').val();
-
-let myArray = inputString.split('\n');
-
-let myArrayWithoutDuplicates = [];
-
-$.each(myArray, function(i, el){
-    if($.inArray(el, myArrayWithoutDuplicates) === -1) myArrayWithoutDuplicates.push(el);
+$('#btn-clear').on('click', function() {
+  $('#keywords').val('');
+  $('#keywords-lines').text(0);
 });
 
-let myArrayWithoutDuplicatesAlphabetical = myArrayWithoutDuplicates.sort();
+$('#btn-remove-duplicates').on('click', function() {
+  let text = $('#keywords').val();
+  let array = transformTextIntoArray(text);
+  array = removeDuplicates(array);
+  $('#keywords').val(transformArrayIntoText(array));
+  $('#keywords-lines').text(array.length);
+});
 
-for(let i = 0; i < myArrayWithoutDuplicatesAlphabetical.length; i++) {
-  if(myArrayWithoutDuplicatesAlphabetical[i].split(' ').length >= 10) {
-    myArrayWithoutDuplicatesAlphabetical.pop(i);
+$('#btn-sort-alphabetically').on('click', function() {
+  let text = $('#keywords').val();
+  let array = transformTextIntoArray(text);
+  array = sortAlphabetically(array);
+  $('#keywords').val(transformArrayIntoText(array));
+  $('#keywords-lines').text(array.length);
+});
+
+$('#btn-remove-big-keywords').on('click', function() {
+  let text = $('#keywords').val();
+  let array = transformTextIntoArray(text);
+  array = removeBigKeywords(array);
+  $('#keywords').val(transformArrayIntoText(array));
+  $('#keywords-lines').text(array.length);
+});
+
+$('#keywords').bind('input propertychange', function() {
+  let text = $(this).val();
+  if(text === '') {
+    $('#keywords-lines').text(0);
+  } else {
+    let array = transformTextIntoArray(text);
+    $('#keywords-lines').text(array.length);
   }
-}
-
-let outputString = '';
-
-for(let i = 0; i < myArrayWithoutDuplicatesAlphabetical.length; i++) {
-  outputString = outputString + myArrayWithoutDuplicatesAlphabetical[i] + '\n';
-}
-
-
-
-$('#output').val(outputString);
-
-
 });
+
+function transformTextIntoArray(text) {
+  let array = text.split('\n');
+  return array;
+}
+
+function transformArrayIntoText(array) {
+  let text = '';
+  for(let i = 0; i < array.length; i++) {
+    if(i === array.length - 1) {
+      text = text + array[i];
+    } else {
+      text = text + array[i] + '\n';
+    }
+  }
+  return text;
+}
+
+function removeDuplicates(oldArray) {
+  let uniqueArray = oldArray.filter(function(item, pos) {
+      return oldArray.indexOf(item) == pos;
+  });
+  return uniqueArray;
+}
+
+function sortAlphabetically(oldArray) {
+  let newArray = oldArray.sort();
+  return newArray;
+}
+
+function removeBigKeywords(oldArray) {
+  let newArray = [];
+  for(let i = 0; i < oldArray.length; i++) {
+    if(oldArray[i].split(' ').length <= 10) {
+      newArray.push(oldArray[i]);
+    }
+  }
+  return newArray;
+}
 
 </script>
 
